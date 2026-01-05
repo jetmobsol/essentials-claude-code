@@ -62,11 +62,19 @@ Fixing a plan is cheap. Debugging bad generated code is expensive.
 | Auto | `/implement-loop plan.md --auto` | Runs continuously |
 | Cancel | `/cancel-implement` | Stops, preserves progress |
 
-**Step mode:** Hook triggers `AskUserQuestion` after each todo. You'll see:
+**Step mode:** After each todo, outputs execution status then pauses:
 ```
-Continue implementation? [Continue] / [Stop]
+===============================================================
+TODO COMPLETED: Add validation logic
+===============================================================
+Progress: 2/5 todos complete
+
+EXECUTION ORDER (remaining):
+  Next → Todo 3: Write unit tests
+  Then → Todo 4: Run exit criteria
+===============================================================
 ```
-Select **Continue** to proceed to the next todo, or **Stop** to end the loop gracefully (preserves progress).
+Select **Continue** to proceed, or **Stop** to end gracefully (preserves progress).
 
 **Auto-decomposition:** After reading plan, agent assesses complexity. If >5 files, >500 lines, or >2 subsystems → auto-creates grouped sub-todos via `TodoWrite`.
 

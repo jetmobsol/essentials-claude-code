@@ -57,7 +57,18 @@ Fixing a spec is cheap. Debugging bad generated code is expensive.
 /cancel-spec-loop                            # Stop gracefully
 ```
 
-**Step mode:** Hook triggers `AskUserQuestion` after each task with Continue/Stop/Pick options.
+**Step mode:** After each task, outputs execution status then pauses:
+```
+===============================================================
+TASK COMPLETED: Add validation middleware
+===============================================================
+Progress: 2/4 tasks complete
+
+EXECUTION ORDER (remaining):
+  Next → Task 3: Create unit tests
+  Then → Task 4: Run integration tests
+===============================================================
+```
 
 **Loop mechanism:** Stop hook checks `tasks.md` for uncompleted `- [ ]` tasks. State tracked in `.claude/spec-loop.local.md`.
 

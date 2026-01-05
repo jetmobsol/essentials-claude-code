@@ -73,6 +73,14 @@ ultrathink and traverse and analyse the code. Ask clarifying questions before fi
 
 **Auto-decomposition:** Beads >200 lines are automatically split—parent marked `decomposed`, child sub-beads created with `--parent`. Multi-spec preserves cross-spec dependencies.
 
+**Output shows execution order:**
+```
+EXECUTION ORDER (by priority):
+  P0 (no blockers): task-001, task-002
+  P1 (after P0): task-003, task-004
+  P2 (after P1): task-005
+```
+
 **Review beads:** `bd list -l "openspec:<name>"` then `bd show <id>` — verify complete code snippets and exit criteria.
 
 ### Stage 5: Execute
@@ -83,7 +91,18 @@ ultrathink and traverse and analyse the code. Ask clarifying questions before fi
 /cancel-beads                                  # Stop gracefully
 ```
 
-**Step mode:** Hook triggers `AskUserQuestion` after each bead with Continue/Stop/Pick options.
+**Step mode:** After each bead, outputs execution status then pauses:
+```
+===============================================================
+BEAD COMPLETED: task-001
+===============================================================
+Progress: 1/5 beads complete
+
+EXECUTION ORDER (remaining):
+  Next → task-002: Add validation (P0)
+  Then → task-003: Write tests (P1, blocked until P0 done)
+===============================================================
+```
 
 **Loop mechanism:** Stop hook checks `bd ready` for remaining tasks. If ready beads exist, loop continues. State tracked in `.claude/beads-loop.local.md`.
 

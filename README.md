@@ -116,7 +116,7 @@ Large tasks are **automatically** split—no user prompt needed. Agent assesses 
 |---------|----------|---------------|
 | `/implement-loop` | >5 files, >500 lines, >2 subsystems | Grouped sub-todos via `TodoWrite` |
 | `/proposal-creator` | >2 subsystems, >2000 lines | Multiple specs with `depends_on` |
-| `/beads-creator` | >200 lines per bead | Parent marked `decomposed`, child sub-beads created |
+| `/beads-creator` | >200 lines per bead | Parent marked `decomposed`, child sub-beads with priorities |
 
 **Output format:**
 ```
@@ -141,8 +141,13 @@ PLAN                          SPECS (auto-decomposed)           BEADS
 /proposal-creator                       ▼
 (>2 subsystems → 3 specs)    /beads-creator backend/ frontend/ tests/
                                         │
-                             Creates cross-spec dependencies, executes in order:
-                             1. backend tasks (parallel) → 2. frontend → 3. tests
+                             Creates cross-spec dependencies with execution order:
+
+/beads-creator output:
+EXECUTION ORDER (by priority):
+  P0: task-001, task-002, task-003 (backend - no blockers)
+  P1: task-004, task-005 (frontend - after backend)
+  P2: task-006, task-007 (tests - after frontend)
 ```
 
 ### Context Chain
@@ -186,8 +191,21 @@ Based on [Ralph Wiggum](https://github.com/anthropics/claude-code/tree/main/plug
 
 **State file tracks:** `iteration`, `max_iterations`, `plan_path`, `step_mode`, `started_at`
 
-**Step mode:** After each todo, hook triggers `AskUserQuestion` with Continue/Stop options.
-**Auto mode:** Hook auto-continues without pause.
+**Step mode:** After each task, outputs execution status then triggers `AskUserQuestion`:
+```
+===============================================================
+TODO COMPLETED: Add validation logic
+===============================================================
+Progress: 2/5 todos complete
+
+EXECUTION ORDER (remaining):
+  Next → Todo 3: Write unit tests
+  Then → Todo 4: Run integration tests
+  Then → Todo 5: Run exit criteria
+===============================================================
+```
+
+**Auto mode:** Follows same execution order without pause.
 
 **Recovery:** State file + `plan_reference` in specs enable resume after context compaction or new session.
 
