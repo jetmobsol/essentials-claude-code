@@ -1,26 +1,19 @@
 ---
 allowed-tools: Task, TaskOutput
 argument-hint: "[directory-or-files]"
-description: Generate DEVGUIDE.md architectural documentation using Serena LSP (project)
-skills: ["serena-lsp"]
+description: Generate DEVGUIDE.md architectural documentation using LSP (project)
 ---
 
-Generate hierarchical architectural documentation (DEVGUIDE.md) by analyzing code structure with Serena LSP tools.
+Generate hierarchical architectural documentation (DEVGUIDE.md) by analyzing code structure with Claude Code's built-in LSP tools.
 
 **IMPORTANT**: Keep orchestrator output minimal. User reviews the document FILE directly.
 
-## Related Skills
+## Built-in LSP Operations Used
 
-For manual LSP code navigation, use:
-- `/serena-lsp` — LSP-powered code navigation (symbols, references, patterns)
-
-## Serena MCP Tools Used
-
-This command uses these Serena MCP tools directly:
-- `list_dir` — Discover directory structure
-- `get_symbols_overview` — Extract symbols from files
-- `find_symbol` — Detailed symbol analysis
-- `find_referencing_symbols` — Map dependencies
+This command uses these Claude Code built-in LSP operations:
+- `documentSymbol` — Extract symbols from files
+- `findReferences` — Map dependencies
+- `goToDefinition` — Detailed symbol analysis
 
 ## Arguments
 
@@ -50,20 +43,20 @@ Parse `$ARGUMENTS`:
 
 ### Step 3: Launch Agent
 
-Launch `document-creator-serena` in background:
+Launch `document-creator` in background:
 
 ```
-Generate DEVGUIDE.md architectural documentation using Serena LSP.
+Generate DEVGUIDE.md architectural documentation using built-in LSP.
 
 Target: <directory or files>
 Output File: <determined path - DEVGUIDE.md or DEVGUIDE_N.md>
 
 ## Process
 
-1. DIRECTORY ANALYSIS - Use list_dir to discover structure
+1. DIRECTORY ANALYSIS - Use Glob to discover structure
 2. SYMBOL EXTRACTION - Use get_symbols_overview for each file
 3. PATTERN IDENTIFICATION - Use find_symbol for detailed analysis
-4. REFERENCE MAPPING - Use find_referencing_symbols for dependencies
+4. REFERENCE MAPPING - Use findReferences for dependencies
 5. DEVGUIDE GENERATION - All sections with LSP-verified patterns
 6. QUALITY VALIDATION
 
@@ -72,13 +65,13 @@ OUTPUT_FILE: <path>
 STATUS: CREATED
 ```
 
-Use `subagent_type: "document-creator-serena"` and `run_in_background: true`.
+Use `subagent_type: "document-creator"` and `run_in_background: true`.
 
 ### Step 4: Report Result
 
 ```
 ===============================================================
-DEVGUIDE CREATED (Serena LSP)
+DEVGUIDE CREATED (built-in LSP)
 ===============================================================
 
 Target: [path]
@@ -112,14 +105,14 @@ NEXT STEPS
 ┌───────────────────────────────────────────────────────────────┐
 │ STEP 2: LAUNCH AGENT                                          │
 │                                                               │
-│  Agent: document-creator-serena                               │
+│  Agent: document-creator                               │
 │  Mode: run_in_background: true                                │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASES:                                           │  │
 │  │                                                         │  │
 │  │  1. DIRECTORY ANALYSIS                                  │  │
-│  │     • list_dir to discover structure                    │  │
+│  │     • Glob to discover structure                    │  │
 │  │     • Detect language and framework                     │  │
 │  │     • Identify directory purpose                        │  │
 │  │                                                         │  │
@@ -131,7 +124,7 @@ NEXT STEPS
 │  │  3. PATTERN IDENTIFICATION                              │  │
 │  │     • Extract structural templates                      │  │
 │  │     • Identify design patterns                          │  │
-│  │     • find_referencing_symbols for dependencies         │  │
+│  │     • findReferences for dependencies         │  │
 │  │                                                         │  │
 │  │  4. DEVGUIDE GENERATION                                 │  │
 │  │     • Overview, Templates, Patterns, Best Practices     │  │

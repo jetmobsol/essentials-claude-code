@@ -215,7 +215,7 @@ EXECUTION ORDER (remaining):
 |------|-----|---------|
 | OpenSpec | `/proposal-creator`, `/spec-loop` | [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) |
 | Beads | `/beads-creator`, `/beads-loop` | [steveyegge/beads](https://github.com/steveyegge/beads) |
-| Serena MCP | `/code-quality-plan-creator`, `/codemap-creator`, `/document-creator` | `/plugin install serena` |
+| Built-in LSP | `/code-quality-plan-creator`, `/codemap-creator`, `/document-creator` | Already included in Claude Code |
 | Context7 | `/plan-creator`, `/prompt-creator` | `/plugin install context7` |
 
 ## Guides

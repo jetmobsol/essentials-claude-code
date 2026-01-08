@@ -1,26 +1,19 @@
 ---
 allowed-tools: Task, TaskOutput
 argument-hint: "[directory] [--ignore <patterns>]"
-description: Generate comprehensive code maps with Serena LSP for symbol tracking and reference verification (project)
-skills: ["serena-lsp"]
+description: Generate comprehensive code maps with LSP for symbol tracking and reference verification (project)
 ---
 
-Generate a comprehensive code map using Serena LSP tools. Maps all functions, classes, variables, and imports with verification tracking.
+Generate a comprehensive code map using Claude Code's built-in LSP tools. Maps all functions, classes, variables, and imports with verification tracking.
 
 **IMPORTANT**: Keep orchestrator output minimal. User reviews the code map JSON file directly, not in chat.
 
-## Related Skills
+## Built-in LSP Operations Used
 
-For manual LSP code navigation, use:
-- `/serena-lsp` — LSP-powered code navigation (symbols, references, patterns)
-
-## Serena MCP Tools Used
-
-This command uses these Serena MCP tools directly:
-- `list_dir` — Discover files recursively
-- `get_symbols_overview` — Extract symbols from each file
-- `find_referencing_symbols` — Verify symbol usage
-- `search_for_pattern` — Find consumer files
+This command uses these Claude Code built-in LSP operations:
+- `documentSymbol` — Get all symbols in a document
+- `findReferences` — Verify symbol usage
+- `goToDefinition` — Find symbol definitions
 
 ## Arguments
 
@@ -43,28 +36,28 @@ Validate the directory exists before proceeding. If it doesn't exist, report the
 
 ### Step 2: Launch Code Map Agent
 
-Launch the `codemap-creator-serena` agent using the Task tool:
+Launch the `codemap-creator` agent using the Task tool:
 
 ```
-Generate a comprehensive code map for the specified directory using Serena LSP tools.
+Generate a comprehensive code map for the specified directory using built-in LSP tools.
 
 Target directory: <directory-path or "." for root>
 Ignore patterns: <patterns or "none">
 
 Create a complete code map following the 7-phase process:
 
-1. FILE DISCOVERY (Do this FIRST using Serena):
-   - Use list_dir(relative_path="<directory>", recursive=true) to find all files
+1. FILE DISCOVERY (Do this FIRST using built-in):
+   - Use Glob(relative_path="<directory>", recursive=true) to find all files
    - Apply ignore patterns to filter out unwanted files/directories
    - Build complete file manifest with total count
 
 2. SYMBOL EXTRACTION (using LSP) for each file:
-   - Use get_symbols_overview(relative_path="file", depth=2) to extract symbols
+   - Use documentSymbol(relative_path="file", depth=2) to extract symbols
    - Catalog: imports, variables, constants, classes (with methods), functions
    - Track check_status: pending → in_progress → completed
 
 3. REFERENCE VERIFICATION (using LSP):
-   - Use find_referencing_symbols for key public symbols
+   - Use findReferences for key public symbols
    - Verify exports are actually used
    - Document findings in notes array
 
@@ -86,7 +79,7 @@ Create a complete code map following the 7-phase process:
 7. REPORT OUTPUT:
    - Statistics summary
    - Packages discovered
-   - Serena verification stats
+   - built-in verification stats
    - Map file path
 
 OUTPUT FORMAT:
@@ -95,19 +88,19 @@ Your output MUST include:
 - Total files mapped and verified counts
 - Symbol counts (classes, functions, variables, imports)
 - Package breakdown with descriptions
-- Serena verification statistics
+- built-in verification statistics
 - The map file path
 
 The JSON map must follow this exact structure:
 
 {
   "generated_at": "YYYY-MM-DD",
-  "description": "Complete codebase map with Serena LSP verification",
+  "description": "Complete codebase map with built-in LSP verification",
   "target_directory": "<directory>",
   "ignore_patterns": ["<pattern1>", "<pattern2>"],
-  "serena_config": {
+  "default_config": {
     "instructions": "...",
-    "serena_tools_to_use": [...],
+    "default_tools_to_use": [...],
     "total_files": N,
     "files_completed": N,
     "files_pending": N,
@@ -118,7 +111,7 @@ The JSON map must follow this exact structure:
     "path/to/file.py": {
       "check_status": "completed",
       "last_checked": "ISO-timestamp",
-      "serena_checks": {
+      "default_checks": {
         "symbols_verified": true,
         "references_checked": true,
         "dependencies_mapped": true
@@ -139,11 +132,11 @@ The JSON map must follow this exact structure:
 }
 ```
 
-Use `subagent_type: "codemap-creator-serena"` for the Task tool invocation.
+Use `subagent_type: "codemap-creator"` for the Task tool invocation.
 
 ### Step 3: Wait for Completion
 
-Use `TaskOutput` with `block: true` to wait for the codemap-creator-serena agent to complete.
+Use `TaskOutput` with `block: true` to wait for the codemap-creator agent to complete.
 
 Collect:
 - Map file path
@@ -156,7 +149,7 @@ Collect:
 Present the code map results to the user:
 
 ```
-## Code Map Generation Complete (Serena LSP)
+## Code Map Generation Complete (built-in LSP)
 
 ### Map Statistics
 
@@ -179,7 +172,7 @@ Present the code map results to the user:
 |---------|-------|-------------|
 | [name] | X | [description] |
 
-### Serena Verification
+### built-in Verification
 
 | Check | Status |
 |-------|--------|
@@ -212,24 +205,24 @@ Present the code map results to the user:
 ┌───────────────────────────────────────────────────────────────┐
 │ STEP 2: LAUNCH AGENT                                          │
 │                                                               │
-│  Agent: codemap-creator-serena                                │
+│  Agent: codemap-creator                                │
 │  Mode: run_in_background: true                                │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASES:                                           │  │
 │  │                                                         │  │
 │  │  1. FILE DISCOVERY                                      │  │
-│  │     • list_dir (recursive) to find all files            │  │
+│  │     • Glob (recursive) to find all files            │  │
 │  │     • Apply ignore patterns                             │  │
 │  │     • Build file manifest                               │  │
 │  │                                                         │  │
 │  │  2. SYMBOL EXTRACTION                                   │  │
-│  │     • get_symbols_overview for each file                │  │
+│  │     • documentSymbol for each file                │  │
 │  │     • Extract imports, classes, functions, variables    │  │
 │  │     • Track check_status: pending → in_progress → done  │  │
 │  │                                                         │  │
 │  │  3. REFERENCE VERIFICATION                              │  │
-│  │     • find_referencing_symbols for public symbols       │  │
+│  │     • findReferences for public symbols       │  │
 │  │     • Mark verified_used or potentially_unused          │  │
 │  │                                                         │  │
 │  │  4. DEPENDENCY MAPPING                                  │  │
@@ -260,7 +253,7 @@ Present the code map results to the user:
 │  • Map file path                                              │
 │  • Statistics (files, classes, functions, imports)            │
 │  • Packages discovered                                        │
-│  • Serena verification stats                                  │
+│  • built-in verification stats                                  │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -316,9 +309,9 @@ The generated JSON map includes:
   "target_directory": "src/",
   "ignore_patterns": ["*.test.ts", "node_modules"],
 
-  "serena_config": {
+  "default_config": {
     "instructions": "How to use this map for verification...",
-    "serena_tools_to_use": ["get_symbols_overview", "find_referencing_symbols", ...],
+    "default_tools_to_use": ["documentSymbol", "findReferences", ...],
     "total_files": 32,
     "files_completed": 32,
     "files_pending": 0,
@@ -330,7 +323,7 @@ The generated JSON map includes:
     "package/module.py": {
       "check_status": "completed",
       "last_checked": "2025-12-30T00:00:00Z",
-      "serena_checks": {
+      "default_checks": {
         "symbols_verified": true,
         "references_checked": true,
         "dependencies_mapped": true
@@ -357,7 +350,7 @@ The generated JSON map includes:
 }
 ```
 
-## Advantages of Serena LSP Mapping
+## Advantages of built-in LSP Mapping
 
 **Accuracy:**
 - Language server understands syntax and semantics
@@ -365,7 +358,7 @@ The generated JSON map includes:
 - Proper method extraction from classes
 
 **Verification:**
-- `find_referencing_symbols` validates symbol usage
+- `findReferences` validates symbol usage
 - Identifies truly unused code
 - Tracks verification status per file
 

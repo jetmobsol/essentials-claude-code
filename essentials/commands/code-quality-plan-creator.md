@@ -2,27 +2,21 @@
 allowed-tools: Task, TaskOutput
 argument-hint: "<file1> [file2] ... [fileN]"
 description: LSP-powered architectural code quality analysis - generates comprehensive improvement plans for /implement-loop or OpenSpec
-skills: ["serena-lsp"]
 ---
 
 # Architectural Code Quality Planning (LSP-Powered)
 
-Analyze code quality using **Serena LSP** for semantic code understanding and generate comprehensive **architectural improvement plans**. For large quality improvements that require structural changes, architectural planning with full context produces dramatically better results.
+Analyze code quality using **Claude Code's built-in LSP** for semantic code understanding and generate comprehensive **architectural improvement plans**. For large quality improvements that require structural changes, architectural planning with full context produces dramatically better results.
 
 **IMPORTANT**: Keep orchestrator output minimal. User reviews the code quality report FILE directly, not in chat.
 
-## Related Skills
+## Built-in LSP Operations Used
 
-For manual LSP code navigation, use:
-- `/serena-lsp` — LSP-powered code navigation (symbols, references, patterns)
-
-## Serena MCP Tools Used
-
-This command uses these Serena MCP tools directly:
-- `get_symbols_overview` — Get class/function hierarchy
-- `find_symbol` — Find symbols by name
-- `find_referencing_symbols` — Find all uses of a symbol
-- `search_for_pattern` — Regex search in code
+This command uses these Claude Code built-in LSP operations:
+- `documentSymbol` — Get all symbols in a document
+- `findReferences` — Find all references to a symbol
+- `goToDefinition` — Find where a symbol is defined
+- `incomingCalls`/`outgoingCalls` — Build call hierarchy
 
 ## Why Architectural Quality Plans with LSP?
 
@@ -49,7 +43,7 @@ Architectural code quality analysis with full context produces dramatically bett
 1. **Clear Issue Specification (LSP-Verified)**
    - Exact location of quality issues (file:line)
    - Symbol references and call hierarchy
-   - Unused elements verified via find_referencing_symbols
+   - Unused elements verified via findReferences
 
 2. **Architectural Improvement Specification**
    - Exact code changes with before/after
@@ -81,10 +75,10 @@ Validate each file path exists before proceeding. If a file doesn't exist, repor
 
 ### Step 2: Launch Architectural Analysis Agents in Background
 
-For EACH file in the list, launch a `code-quality-plan-creator-serena` agent **in the background** using the Task tool with `run_in_background: true`:
+For EACH file in the list, launch a `code-quality-plan-creator` agent **in the background** using the Task tool with `run_in_background: true`:
 
 ```
-Create a comprehensive architectural quality improvement plan with maximum depth and verbosity using Serena LSP.
+Create a comprehensive architectural quality improvement plan with maximum depth and verbosity using built-in LSP.
 
 File to analyze: <file-path>
 
@@ -97,27 +91,27 @@ Requirements:
 - Include exit criteria with verification commands
 - Target quality score: ≥9.1/10
 
-Perform a comprehensive code quality analysis following your 7-phase process with Serena LSP:
+Perform a comprehensive code quality analysis following your 7-phase process with built-in LSP:
 
-0. CONTEXT GATHERING (Do this FIRST using Serena):
-   - Use find_file to locate CLAUDE.md, README.md, devguides/style guides
-   - Use search_for_pattern to find files that IMPORT this file (consumers)
-   - Use list_dir to find sibling files in the same directory
-   - Use find_file to locate test files
+0. CONTEXT GATHERING (Do this FIRST using built-in):
+   - Use Glob to locate CLAUDE.md, README.md, devguides/style guides
+   - Use Grep to find files that IMPORT this file (consumers)
+   - Use Glob to find sibling files in the same directory
+   - Use Glob to locate test files
    - Summarize project coding standards and patterns from related files
 
-1. CODE ELEMENT EXTRACTION (using LSP) - Use get_symbols_overview and find_symbol to catalog:
+1. CODE ELEMENT EXTRACTION (using LSP) - Use documentSymbol and goToDefinition to catalog:
    - All classes, functions, methods, interfaces
    - Symbol kinds, line ranges, signatures
    - Complete symbol hierarchy with depth=2
 
 2. SCOPE & VISIBILITY ANALYSIS (using LSP):
-   - Use find_referencing_symbols for each public element
+   - Use findReferences for each public element
    - Identify unused elements (zero references found)
    - Cross-reference with consumer usage from Phase 0
 
 3. CALL HIERARCHY MAPPING (using LSP):
-   - Build call graph using find_referencing_symbols
+   - Build call graph using findReferences
    - Find entry points (no callers)
    - Find orphaned code (dead code with no callers)
 
@@ -125,7 +119,7 @@ Perform a comprehensive code quality analysis following your 7-phase process wit
    - Code smells (complexity, design, naming, duplication)
    - SOLID principles violations (SRP, OCP, LSP, ISP, DIP)
    - DRY/KISS/YAGNI violations
-   - Security vulnerability patterns (OWASP-aligned) using search_for_pattern
+   - Security vulnerability patterns (OWASP-aligned) using Grep
    - Technical debt estimation
    - Cognitive complexity measurement
    - PROJECT STANDARDS COMPLIANCE (from context gathered in Phase 0)
@@ -134,7 +128,7 @@ Perform a comprehensive code quality analysis following your 7-phase process wit
 
 5. ARCHITECTURAL IMPROVEMENT PLAN GENERATION - Prioritized fixes with before/after examples
 
-6. WRITE PLAN FILE - Write to .claude/plans/code-quality-plan-creator-serena-{filename}-{hash5}-plan.md (with 5-char hash)
+6. WRITE PLAN FILE - Write to .claude/plans/code-quality-plan-creator-{filename}-{hash5}-plan.md (with 5-char hash)
 
 7. OUTPUT FORMAT - Structured report for orchestrator with LSP stats
 
@@ -164,13 +158,13 @@ enough fixes to bring the projected score to 9.1 or higher.
 This provides all information needed for implementation.
 ```
 
-Use `subagent_type: "code-quality-plan-creator-serena"` for each Task tool invocation.
+Use `subagent_type: "code-quality-plan-creator"` for each Task tool invocation.
 
 **Launch ALL agents in a single message** with `run_in_background: true` to enable parallel execution.
 
 ### Step 3: Wait for Specialist Completion
 
-Use `TaskOutput` with `block: true` to wait for each code-quality-plan-creator-serena agent to complete.
+Use `TaskOutput` with `block: true` to wait for each code-quality-plan-creator agent to complete.
 
 For each completed agent, collect:
 - File path
@@ -185,7 +179,7 @@ For each completed agent, collect:
 
 From each agent's output, extract:
 1. The file path analyzed
-2. The plan file path (e.g., `.claude/plans/code-quality-plan-creator-serena-filename-3m8k5-plan.md` with 5-char hash)
+2. The plan file path (e.g., `.claude/plans/code-quality-plan-creator-filename-3m8k5-plan.md` with 5-char hash)
 3. Whether changes are required (`Changes Required: Yes/No`)
 4. Quality scores, issue counts, and LSP statistics
 
@@ -196,7 +190,7 @@ Present the analysis results and implementation options to the user:
 
 ### Analysis Results
 
-**Tool Used**: Serena LSP (semantic code navigation)
+**Tool Used**: built-in LSP (semantic code navigation)
 
 | File | Current Score | Projected Score | Issues | LSP Symbols | Changes Required |
 |------|---------------|-----------------|--------|-------------|------------------|
@@ -223,8 +217,8 @@ Present the analysis results and implementation options to the user:
 
 ### Plan Files Generated
 
-- `.claude/plans/code-quality-plan-creator-serena-file1-{hash5}-plan.md`
-- `.claude/plans/code-quality-plan-creator-serena-file2-{hash5}-plan.md`
+- `.claude/plans/code-quality-plan-creator-file1-{hash5}-plan.md`
+- `.claude/plans/code-quality-plan-creator-file2-{hash5}-plan.md`
 
 ### Next Steps
 
@@ -256,14 +250,14 @@ Present the analysis results and implementation options to the user:
 ┌───────────────────────────────────────────────────────────────┐
 │ ORCHESTRATOR STEP 2: LAUNCH AGENTS (PARALLEL)                 │
 │                                                               │
-│  Agent: code-quality-plan-creator-serena (one per file)       │
+│  Agent: code-quality-plan-creator (one per file)       │
 │  Mode: run_in_background: true                                │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASE 0: CONTEXT GATHERING                        │  │
-│  │  • find_file: CLAUDE.md, README.md, DEVGUIDE.md         │  │
-│  │  • search_for_pattern: Find files importing target      │  │
-│  │  • list_dir: Find sibling files for pattern comparison  │  │
+│  │  • Glob: CLAUDE.md, README.md, DEVGUIDE.md         │  │
+│  │  • Grep: Find files importing target      │  │
+│  │  • Glob: Find sibling files for pattern comparison  │  │
 │  │  • Extract project coding standards                     │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                         │                                     │
@@ -271,14 +265,14 @@ Present the analysis results and implementation options to the user:
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASE 1: CODE ELEMENT EXTRACTION (LSP)            │  │
 │  │  • read_file: Read complete file contents               │  │
-│  │  • get_symbols_overview (depth=2): Catalog symbols      │  │
-│  │  • find_symbol: Analyze each symbol in detail           │  │
+│  │  • documentSymbol (depth=2): Catalog symbols      │  │
+│  │  • goToDefinition: Analyze each symbol in detail           │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                         │                                     │
 │                         ▼                                     │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASE 2: SCOPE & VISIBILITY ANALYSIS (LSP)        │  │
-│  │  • find_referencing_symbols for each public element     │  │
+│  │  • findReferences for each public element     │  │
 │  │  • Identify unused elements (zero references)           │  │
 │  │  • Cross-reference with consumer usage                  │  │
 │  └─────────────────────────────────────────────────────────┘  │
@@ -286,7 +280,7 @@ Present the analysis results and implementation options to the user:
 │                         ▼                                     │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASE 3: CALL HIERARCHY MAPPING (LSP)             │  │
-│  │  • Build call graph via find_referencing_symbols        │  │
+│  │  • Build call graph via findReferences        │  │
 │  │  • Find entry points (no callers)                       │  │
 │  │  • Find orphaned/dead code (no callers)                 │  │
 │  └─────────────────────────────────────────────────────────┘  │
@@ -305,7 +299,7 @@ Present the analysis results and implementation options to the user:
 │  │ AGENT PHASE 4: QUALITY ISSUE IDENTIFICATION             │  │
 │  │  • 11 quality dimensions (SOLID, DRY, KISS, YAGNI...)   │  │
 │  │  • Cognitive/Cyclomatic complexity measurement          │  │
-│  │  • search_for_pattern for security patterns (OWASP)     │  │
+│  │  • Grep for security patterns (OWASP)     │  │
 │  │  • Project standards compliance check                   │  │
 │  │  • Advanced metrics (Halstead, ABC, CBO, LCOM, RFC)     │  │
 │  └─────────────────────────────────────────────────────────┘  │
@@ -331,7 +325,7 @@ Present the analysis results and implementation options to the user:
 │                         ▼                                     │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │ AGENT PHASE 6: WRITE PLAN FILE                          │  │
-│  │  → .claude/plans/code-quality-plan-creator-serena-      │  │
+│  │  → .claude/plans/code-quality-plan-creator-      │  │
 │  │    {filename}-{hash5}-plan.md                           │  │
 │  │                                                         │  │
 │  │  Plan includes:                                         │  │

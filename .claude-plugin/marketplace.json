@@ -11,7 +11,7 @@
     {
       "name": "essentials",
       "version": "2.61.0",
-      "description": "15 commands, 10 agents. Context chain: Plan → Spec → Beads. Each bead is 100% self-contained (50-200+ lines of code) - loop agent never needs to read spec or plan. Full Reference Implementation preserved through entire pipeline. LSP-powered via Serena MCP.",
+      "description": "15 commands, 10 agents. Context chain: Plan → Spec → Beads. Each bead is 100% self-contained (50-200+ lines of code) - loop agent never needs to read spec or plan. Full Reference Implementation preserved through entire pipeline. LSP-powered via Claude Code built-in LSP.",
       "source": "./essentials"
     }
   ]
